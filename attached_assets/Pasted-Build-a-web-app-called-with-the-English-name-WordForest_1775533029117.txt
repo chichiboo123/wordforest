@@ -1,0 +1,315 @@
+Build a web app called "낱말의 숲" with the English name "WordForest".
+
+Core concept:
+This is an educational web app that starts from Korean words and helps users expand into deeper understanding, artistic imagination, and expressive creation. It is not just a dictionary search tool. It should help students and teachers explore words, expand related expressions, read texts deeply, and enrich dramatic expression for poetry, lyrics, and musical/drama activities.
+
+Main Korean tagline:
+낱말을 깊이 이해하고, 예술적 상상과 표현으로 확장해 가는 교육용 웹앱
+
+Primary users:
+- Elementary school students
+- Elementary teachers
+- Classroom activities involving poetry writing, lyric interpretation, educational musical, drama, and expressive language work
+
+Main structure:
+The app has 4 core sections:
+1. 낱말 관찰
+2. 낱말 확장
+3. 깊이 읽기
+4. 극적 표현
+
+Overall learning flow:
+낱말 관찰 → 낱말 확장 → 깊이 읽기 → 극적 표현
+
+Product identity:
+This app must not feel like a search engine for definitions.
+It should feel like a creative language companion that helps users understand words and turn them into artistic expression.
+
+Design and UX direction:
+- Warm, calm, friendly, slightly poetic
+- Forest-inspired visual identity
+- Soft greens, natural tones, clean cards, rounded UI
+- Easy enough for children, but useful for teachers
+- Avoid clutter
+- Make the interface feel like exploring and growing ideas in a forest
+- The app should feel educational, imaginative, and creative rather than technical
+
+Required UI and branding settings:
+
+1. Font
+Use Pretendard Gov as the default font across the entire app.
+
+Use this exact stylesheet link:
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-gov.min.css" />
+
+Important font implementation requirements:
+- Make sure the font is actually applied globally, not just linked
+- Apply the font to html, body, button, input, textarea, select, and all major UI components
+- Ensure there is no fallback from framework defaults overriding the main font
+- If using Tailwind, configure the font family properly in the theme and also apply a global base style
+- If using React or Next.js, ensure the stylesheet is loaded at the app root and the global CSS enforces the font family
+- The final UI should visibly render in Pretendard Gov
+
+Recommended global CSS example:
+html, body, button, input, textarea, select {
+  font-family: "Pretendard GOV", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+2. Multilingual support
+- Support 3 languages: KOR / ENG / JPN
+- Provide a language mode selector in the top-right corner
+- The selector must be a dropdown UI
+- Implement internationalization using i18n
+- Build the app so major labels, menus, helper text, buttons, empty states, and section descriptions can all be translated cleanly
+- Keep Korean as the default language
+
+3. Icons
+- Use Google Material Icons throughout the app
+- Apply them consistently for navigation, cards, buttons, saved items, search, reading, expression, settings, and language selection
+
+4. Footer
+- Add a footer text:
+  Created by. 교육뮤지컬 꿈꾸는 치수쌤
+- Make this text clickable
+- Link target: litt.ly/chichiboo
+- The footer should appear consistently across the main pages
+
+Strict API restriction:
+Do not integrate any external API other than the Standard Korean Language Dictionary API.
+For AI-based interpretation, use placeholder or mock logic only unless a separate API is explicitly provided later.
+Do not add OpenAI, Anthropic, Google AI, translation APIs, speech APIs, recommendation APIs, or any other third-party API calls by default.
+Do not add hidden or optional external integrations.
+If a feature seems to require another API, implement it with internal mock logic, static demo data, or local processing only.
+
+Technical and data foundation:
+- Use the Standard Korean Language Dictionary API (표준국어대사전 API) as the main lexical source
+- Dictionary data should support word meaning, usage, examples, part of speech, and related lexical information where available
+- Reinterpret dictionary content into student-friendly language using local placeholder logic for now
+- Clearly separate dictionary-based information from locally generated interpretation or suggestion content
+
+Repository and deployment requirements:
+- Do not rely on Replit-only deployment as the primary deployment workflow
+- Connect the project to GitHub and manage the source code through GitHub
+- The GitHub repository name must be exactly: forestofwords
+- Structure the project so it can be cleanly pushed, versioned, and maintained in the GitHub repository forestofwords
+- Include a proper .gitignore file
+- Include a clear README.md with setup, development, build, and deployment instructions
+- Prepare the project for GitHub-centered maintenance rather than Replit-only maintenance
+
+GitHub Actions requirements:
+- Use the GitHub Actions tab as part of the project workflow
+- Add a GitHub Actions workflow configuration under .github/workflows/
+- At minimum, include a workflow that installs dependencies and runs a build check on push and pull_request
+- Name the workflow clearly, for example: ci.yml
+- The workflow should be easy to extend later for deployment
+- Make sure the workflow is appropriate for the chosen framework and package manager
+- If environment variables are needed later, document where GitHub repository secrets should be configured
+- Keep the initial workflow simple, stable, and understandable
+
+Important repository workflow principle:
+- The project should be easy to develop in Replit if needed, but the canonical source of truth should be GitHub
+- The project structure, scripts, and documentation should assume GitHub-based version control and GitHub Actions-based automation
+- Do not lock the project into a Replit-specific deployment or Replit-only workflow
+
+Detailed feature requirements:
+
+1. 낱말 관찰
+Purpose:
+Help users deeply observe one word at a time.
+
+Key behavior:
+- User enters a Korean word
+- Show dictionary meaning, examples, and lexical info from the dictionary API
+- Add simple, student-friendly explanation of the word using local placeholder logic
+- Explain the feeling, tone, or possible mood of the word in accessible language
+- Suggest where the word could be used, for example in poetry, a lyric, a character line, or a scene
+- Allow saving interesting words
+
+What this section should feel like:
+A place to pause and really look at one word carefully.
+
+Example outputs:
+- Meaning of the word
+- Example sentence
+- Mood keywords
+- “This word may fit a quiet / bright / trembling / lonely scene”
+- “This word may work well in a poem about spring / memory / longing”
+
+2. 낱말 확장
+Purpose:
+Help users broaden a theme or starting word into a wider set of expressive language materials.
+
+Key behavior:
+- User enters a topic or a word
+- Suggest related words
+- Suggest emotion words
+- Suggest action verbs
+- Suggest descriptive words or scene-related words
+- Let users collect favorite words into a small word set or expression set
+- Support creative activities such as poetry or scene-building
+- Use local mock logic or curated demo relationships if necessary
+- Do not use any external recommendation or language model API
+
+What this section should feel like:
+A place where one seed word grows branches.
+
+Example:
+Input: 비밀
+Possible suggestions:
+숨기다, 속삭이다, 떨리다, 조심스럽다, 들키다, 간직하다
+
+This section should help students who do not know how to begin writing.
+
+3. 깊이 읽기
+Purpose:
+Help users deeply interpret text such as poems, song lyrics, short passages, or musical numbers.
+
+Key behavior:
+- User pastes Korean text
+- Extract important words
+- Highlight meaningful, repeated, emotionally charged, or symbolic words
+- Use dictionary-grounded interpretation where possible
+- Provide student-friendly explanation of key words and overall emotional tone using local placeholder logic
+- Optionally support two reading modes:
+  - 학생용 해설
+  - 교사용 해설
+- Show the emotional atmosphere or expressive qualities of the text
+- Do not call any external summarization, translation, or AI API
+
+What this section should feel like:
+A place for reading beyond the surface.
+
+Important:
+This is not just text summary.
+It should help users understand:
+- What kind of feeling the text creates
+- Which words shape the mood
+- Which repeated or symbolic words matter
+- How the text might be expressed artistically
+
+4. 극적 표현
+Purpose:
+Help users find richer dramatic and performative expression for scenes, emotions, and character moments.
+
+Key behavior:
+- User inputs a scene, situation, or emotional context
+- Suggest action verbs
+- Suggest emotional vocabulary
+- Suggest attitudes, gestures, or delivery hints
+- Suggest ways a line may be spoken
+- Help students move from vague feelings to playable actions
+- Implement suggestion logic with local mock data, predefined expressive categories, or internal rules
+- Do not use any outside API except the dictionary API
+
+What this section should feel like:
+A place where language turns into performance.
+
+Example input:
+친구에게 미안하지만 쉽게 사과하지 못하는 장면
+
+Possible output:
+- Action verbs: 머뭇거리다, 피하다, 떨다, 멈칫하다, 숨죽이다
+- Emotion words: 조심스럽다, 복잡하다, 불안하다, 미안하다
+- Performance hints: 눈을 바로 보지 못한다, 말을 하려다 멈춘다, 숨을 짧게 들이쉰다
+
+This section should support educational musical, drama, roleplay, and expressive speaking.
+
+Main screen requirements:
+Create a clear landing page with:
+- App name: 낱말의 숲
+- English name: WordForest
+- Main tagline
+- Four main menu cards for the 4 sections
+- A warm hero area
+- Optional “today’s word” or “today’s theme”
+- Optional recent saved words or expressions
+- Language dropdown in the top-right corner
+
+Navigation:
+- Clear top navigation or card-based menu
+- Fast movement between the 4 sections
+- Consistent structure across pages
+- Desktop-first, but should adapt well to tablet and mobile
+
+Saved content:
+Include a basic save or favorites feature for:
+- Observed words
+- Expanded word sets
+- Interesting text interpretations
+- Dramatic expression resources
+
+Tone of language inside the product:
+- Encouraging
+- Warm
+- Clear
+- Student-friendly
+- Creative
+- Never harsh or overly academic
+- Feels like a teacher-guided creative tool
+
+Examples of interface tone:
+- 이 낱말은 맑고 가벼운 느낌을 줄 수 있어요.
+- 이 표현은 설레는 마음과 망설임이 함께 느껴져요.
+- 이 장면에서는 천천히 숨을 고르며 말하면 더 잘 어울릴 수 있어요.
+- 이 낱말을 시 속에 넣으면 분위기가 더 선명해질 수 있어요.
+
+Information architecture:
+The four sections should feel connected, not like disconnected tools.
+The overall experience should communicate:
+observe a word → expand language → read deeply → express dramatically
+
+Implementation notes:
+- Korean-first interface
+- Full multilingual-ready architecture using i18n for KOR / ENG / JPN
+- Material Icons must be the standard icon system
+- Pretendard Gov must be visibly and globally applied
+- Footer must remain consistent
+- Keep code modular and maintainable
+- Separate data layer, UI layer, translation layer, and interpretation logic
+- Use sensible placeholder or mock logic where live dictionary integration is not yet complete
+
+Output expectations:
+Design and implement:
+- A polished front-end for this concept
+- Clear UI for each of the 4 sections
+- Korean-first interface text
+- Forest-themed branding
+- Full multilingual-ready structure with i18n for KOR / ENG / JPN
+- Consistent Material Icon usage
+- Pretendard Gov applied globally and correctly
+- Footer with clickable creator credit
+- Modular and maintainable code
+- Mock interpretation logic where needed
+- Good separation between data layer, UI components, translations, and interpretation logic
+- No external API integrations except the Standard Korean Language Dictionary API
+- GitHub-ready project structure for repository name forestofwords
+- GitHub Actions workflow included and documented
+
+If you need to choose priorities, prioritize:
+1. Main landing page
+2. 낱말 관찰
+3. 낱말 확장
+4. 깊이 읽기
+5. 극적 표현
+
+Nice-to-have enhancements:
+- Today’s recommended word
+- Student or teacher mode toggle in 깊이 읽기
+- Word cards or expression cards
+- Classroom-friendly print or export later
+- “My word notebook” in a future version
+
+Do not make the product feel like a generic edtech dashboard.
+Make it feel like a language-and-art creative studio for children and teachers.
+
+At the end, provide:
+1. The project structure
+2. The core UI components
+3. Setup instructions
+4. Exact notes on where to connect the dictionary API
+5. Exact notes on where i18n is configured
+6. Exact notes on font and icon setup
+7. Exact notes on GitHub repository setup for forestofwords
+8. Exact notes on GitHub Actions workflow usage
+9. Confirmation that no external APIs other than the Standard Korean Language Dictionary API were added
+10. Suggestions for future improvements

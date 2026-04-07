@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "WordForest 낱말의 숲"
+version = "1.0.0"
+id = "artifacts/wordforest"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26059
+
+[services.development]
+run = "pnpm --filter @workspace/wordforest run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/wordforest", "run", "build" ]
+publicDir = "artifacts/wordforest/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26059"
+BASE_PATH = "/"
