@@ -1,6 +1,13 @@
 const KRDICT_API_URL = "https://stdict.korean.go.kr/api/search.do";
 
+const CORS_HEADERS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, OPTIONS",
+  "access-control-allow-headers": "Content-Type",
+};
+
 type NetlifyEvent = {
+  httpMethod?: string;
   queryStringParameters?: {
     q?: string;
   };
@@ -18,12 +25,18 @@ function json(statusCode: number, body: Record<string, unknown>): NetlifyRespons
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
+      ...CORS_HEADERS,
     },
     body: JSON.stringify(body),
   };
 }
 
 export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
+  // CORS preflight
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 204, headers: CORS_HEADERS, body: "" };
+  }
+
   const query = event.queryStringParameters?.q?.trim();
   if (!query) {
     return json(400, { error: "Missing required query parameter: q" });
