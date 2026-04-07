@@ -2,7 +2,6 @@ import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useTodayWord } from "@/hooks/useTodayWord";
 import { useSavedItems } from "@/hooks/useSavedItems";
-import { MOCK_DICTIONARY } from "@/data/dictionary";
 
 const SECTION_CARDS = [
   {
@@ -55,8 +54,6 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const todayWord = useTodayWord();
   const { savedWords } = useSavedItems();
-  const todayWordData = MOCK_DICTIONARY[todayWord];
-
   const getLangDesc = (card: typeof SECTION_CARDS[0]) => {
     if (i18n.language === "en") return card.descEn;
     if (i18n.language === "ja") return card.descJa;
@@ -140,23 +137,16 @@ export default function Home() {
           </div>
           <Link href={`/observe?word=${encodeURIComponent(todayWord)}`}>
             <div className="group cursor-pointer">
-              <div className="text-3xl font-bold text-primary mb-2 group-hover:text-primary/80 transition-colors">
+              <div className="text-3xl font-bold text-primary mb-3 group-hover:text-primary/80 transition-colors">
                 {todayWord}
               </div>
-              {todayWordData && (
-                <>
-                  <span className="inline-block text-xs px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full mb-2 font-medium">
-                    {todayWordData.pos}
-                  </span>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{todayWordData.definition}</p>
-                  <p className="text-sm text-muted-foreground/70 mt-2 italic">"{todayWordData.example}"</p>
-                </>
-              )}
-              {!todayWordData && (
-                <p className="text-sm text-muted-foreground">
-                  이 낱말을 눌러서 관찰해 보세요.
-                </p>
-              )}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 mb-2">
+                <span className="material-icons text-xs leading-none">menu_book</span>
+                표준국어대사전에서 뜻 찾아보기
+              </div>
+              <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                이 낱말을 눌러서 관찰해 보세요. →
+              </p>
             </div>
           </Link>
         </div>
