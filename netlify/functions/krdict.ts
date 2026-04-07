@@ -60,18 +60,35 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
     return json(response.status, { error: "KRDICT request failed" });
   }
 
-  const data = await response.json();
-  const item = data?.channel?.item?.[0];
-  if (!item) {
+  const text = await response.text();
+  if (!text || text.trim() === "") {
     return json(404, { error: "No result found" });
   }
 
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    // KRDICT sometimes returns XML even with req_type=json
+    return json(404, { error: "No result found" });
+  }
+
+  const d = data as Record<string, unknown>;
+  const item = (d?.channel as Record<string, unknown>)?.item as unknown[] | undefined;
+  const firstItem = item?.[0] as Record<string, unknown> | undefined;
+  if (!firstItem) {
+    return json(404, { error: "No result found" });
+  }
+
+  const sense = (firstItem.sense as unknown[])?.[0] as Record<string, unknown> | undefined;
+  const exampleEntry = (sense?.example as unknown[])?.[0] as Record<string, unknown> | undefined;
+
   return json(200, {
     item: {
-      word: item.word || query,
-      pos: item.pos || "알 수 없음",
-      definition: item.sense?.[0]?.definition || item.definition || "뜻을 찾을 수 없어요.",
-      example: item.sense?.[0]?.example?.[0]?.example || "",
+      word: (firstItem.word as string) || query,
+      pos: (firstItem.pos as string) || "알 수 없음",
+      definition: (sense?.definition as string) || (firstItem.definition as string) || "뜻을 찾을 수 없어요.",
+      example: (exampleEntry?.example as string) || "",
     },
   });
 }
