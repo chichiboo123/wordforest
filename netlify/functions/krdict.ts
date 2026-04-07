@@ -55,9 +55,16 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
     num: "3",
   });
 
-  const response = await fetch(`${KRDICT_API_URL}?${params.toString()}`);
+  let response: Response;
+  try {
+    response = await fetch(`${KRDICT_API_URL}?${params.toString()}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return json(502, { error: "KRDICT unreachable", detail: message });
+  }
+
   if (!response.ok) {
-    return json(response.status, { error: "KRDICT request failed" });
+    return json(response.status, { error: "KRDICT request failed", status: response.status });
   }
 
   const text = await response.text();
