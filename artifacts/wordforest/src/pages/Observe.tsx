@@ -1,115 +1,52 @@
 import { useState, useEffect } from "react";
 import { useSearch } from "wouter";
 import { useTranslation } from "react-i18next";
-import { MOCK_DICTIONARY } from "@/data/dictionary";
+import { lookupWord, type WordResult } from "@/lib/krdict";
 import { useSavedItems } from "@/hooks/useSavedItems";
 import { useToast } from "@/hooks/use-toast";
 
+// 창작 활동을 위한 어울림 힌트 (단어 특성과 관계없는 일반 제안)
 const MOOD_KEYWORDS = [
-  "맑다", "잔잔하다", "따뜻하다", "고요하다", "설레다",
-  "쓸쓸하다", "두근거리다", "포근하다", "서늘하다", "부드럽다",
-  "신비롭다", "날카롭다", "조용하다", "아련하다",
+  "잔잔하다", "따뜻하다", "설레다", "아련하다",
+  "신비롭다", "포근하다", "쓸쓸하다", "두근거리다",
 ];
 
 const USAGE_SUGGESTIONS = [
-  "시의 첫 구절에서",
-  "노랫말의 후렴구에서",
-  "인물의 독백에서",
-  "장면 묘사에서",
-  "감정 표현에서",
+  "시의 첫 구절에서 분위기를 열어줄 때",
+  "인물의 내면을 묘사하는 독백에서",
+  "노랫말의 후렴구에서 감정을 강조할 때",
+  "장면 전환 전후의 묘사에서",
 ];
 
-const SCENE_TEMPLATES = [
-  (word: string) => `이 낱말은 봄비가 내리는 조용한 오후의 장면과 잘 어울려요.`,
-  (word: string) => `"${word}"는 설레는 마음과 기대감이 함께 느껴지는 장면에서 빛날 수 있어요.`,
-  (word: string) => `이 낱말을 시 속에 넣으면 분위기가 더 선명해질 수 있어요.`,
-];
-
-function getMoodForWord(word: string): string[] {
-  const charCode = word.charCodeAt(0) + word.length;
-  const selected: string[] = [];
-  for (let i = 0; i < 3; i++) {
-    selected.push(MOOD_KEYWORDS[(charCode + i * 3) % MOOD_KEYWORDS.length]);
+function SourceBadge({ source }: { source: WordResult["source"] }) {
+  if (source === "krdict") {
+    return (
+      <a
+        href="https://stdict.korean.go.kr"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 hover:opacity-80 transition-opacity"
+        title="국립국어원 표준국어대사전에서 가져온 뜻풀이입니다"
+      >
+        <span className="material-icons text-xs leading-none">menu_book</span>
+        표준국어대사전
+      </a>
+    );
   }
-  return [...new Set(selected)];
-}
-
-function getUsageForWord(word: string): string[] {
-  const charCode = word.charCodeAt(0);
-  return [
-    USAGE_SUGGESTIONS[charCode % USAGE_SUGGESTIONS.length],
-    USAGE_SUGGESTIONS[(charCode + 2) % USAGE_SUGGESTIONS.length],
-  ];
-}
-
-function getSceneForWord(word: string): string[] {
-  return SCENE_TEMPLATES.map((fn) => fn(word));
-}
-
-interface WordResult {
-  word: string;
-  pos: string;
-  definition: string;
-  example: string;
-}
-
-function toWordResult(data: any, fallbackWord: string): WordResult | null {
-  const proxyItem = data?.item;
-  if (proxyItem && typeof proxyItem === "object") {
-    return {
-      word: proxyItem.word || fallbackWord,
-      pos: proxyItem.pos || "알 수 없음",
-      definition: proxyItem.definition || "뜻을 찾을 수 없어요.",
-      example: proxyItem.example || "",
-    };
+  if (source === "mock") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary text-muted-foreground border border-border">
+        <span className="material-icons text-xs leading-none">inventory_2</span>
+        샘플 데이터
+      </span>
+    );
   }
-
-  const stdictItem = data?.channel?.item?.[0];
-  if (stdictItem) {
-    return {
-      word: stdictItem.word || fallbackWord,
-      pos: stdictItem.pos || "알 수 없음",
-      definition: stdictItem.sense?.[0]?.definition || stdictItem.definition || "뜻을 찾을 수 없어요.",
-      example: stdictItem.sense?.[0]?.example?.[0]?.example || "",
-    };
-  }
-
-  return null;
-}
-
-async function lookupWord(word: string): Promise<WordResult | null> {
-  const configuredProxyUrl = import.meta.env.VITE_KRDICT_PROXY_URL?.trim();
-  const isNetlifyHost =
-    typeof window !== "undefined" &&
-    (window.location.hostname.endsWith(".netlify.app") || window.location.hostname === "localhost");
-  const proxyUrl = configuredProxyUrl || (isNetlifyHost ? "/.netlify/functions/krdict" : "");
-  if (proxyUrl) {
-    try {
-      const url = `${proxyUrl}?q=${encodeURIComponent(word)}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        const parsed = toWordResult(data, word);
-        if (parsed) {
-          return parsed;
-        }
-      }
-    } catch {
-      // Fall through to mock
-    }
-  }
-
-  const mock = MOCK_DICTIONARY[word];
-  if (mock) {
-    return { word, ...mock };
-  }
-
-  return {
-    word,
-    pos: "낱말",
-    definition: `"${word}"의 뜻을 직접 사전에서 찾아보거나, 이 낱말이 가진 느낌을 상상해 보세요.`,
-    example: `${word}이(가) 마음속에 떠오른다.`,
-  };
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+      <span className="material-icons text-xs leading-none">info</span>
+      사전 미등재
+    </span>
+  );
 }
 
 export default function Observe() {
@@ -123,10 +60,6 @@ export default function Observe() {
   const [loading, setLoading] = useState(false);
   const { saveWord, savedWords } = useSavedItems();
   const { toast } = useToast();
-
-  const moods = result ? getMoodForWord(result.word) : [];
-  const usages = result ? getUsageForWord(result.word) : [];
-  const scenes = result ? getSceneForWord(result.word) : [];
 
   const isWordSaved = result ? savedWords.some((w) => w.word === result.word) : false;
 
@@ -146,8 +79,10 @@ export default function Observe() {
 
   useEffect(() => {
     if (initialWord) {
+      setLoading(true);
       lookupWord(initialWord).then((res) => {
         setResult(res);
+        setLoading(false);
       });
     }
   }, [initialWord]);
@@ -201,21 +136,22 @@ export default function Observe() {
 
       {result && !loading && (
         <div className="space-y-5">
-          {/* Word Header */}
+          {/* 낱말 뜻풀이 (표준국어대사전) */}
           <div className="p-6 rounded-2xl bg-card border border-border">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
                   <h2 className="text-3xl font-bold text-primary">{result.word}</h2>
                   <span className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full font-medium">
                     {result.pos}
                   </span>
+                  <SourceBadge source={result.source} />
                 </div>
                 <p className="text-foreground text-base leading-relaxed font-medium">{result.definition}</p>
                 {result.example && (
-                  <p className="text-muted-foreground text-sm mt-2 italic">
-                    <span className="not-italic text-muted-foreground/60 text-xs mr-1">예문</span>
-                    "{result.example}"
+                  <p className="text-muted-foreground text-sm mt-3 pl-3 border-l-2 border-primary/20">
+                    <span className="text-muted-foreground/60 text-xs block mb-0.5">예문</span>
+                    <span className="italic">"{result.example}"</span>
                   </p>
                 )}
               </div>
@@ -237,62 +173,78 @@ export default function Observe() {
             </div>
           </div>
 
-          {/* Mood Keywords */}
+          {/* 창작 활용 힌트 */}
           <div className="p-5 rounded-2xl bg-card border border-border">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-icons text-amber-500 text-xl leading-none">mood</span>
-              <h3 className="font-semibold text-foreground">{t("observe.mood")}</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-icons text-amber-500 text-xl leading-none">lightbulb</span>
+              <h3 className="font-semibold text-foreground">창작 활용 힌트</h3>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {moods.map((mood) => (
-                <span
-                  key={mood}
-                  className="px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-full text-sm font-medium"
-                >
-                  {mood}
-                </span>
-              ))}
+            <div className="space-y-4">
+              {/* 분위기 낱말 */}
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 font-medium">어울리는 분위기</p>
+                <div className="flex flex-wrap gap-2">
+                  {MOOD_KEYWORDS.map((mood) => (
+                    <span
+                      key={mood}
+                      className="px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-full text-sm font-medium"
+                    >
+                      {mood}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* 사용 상황 */}
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 font-medium">어울리는 상황</p>
+                <ul className="space-y-1.5">
+                  {USAGE_SUGGESTIONS.map((usage, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="material-icons text-primary/50 text-sm leading-5">chevron_right</span>
+                      {usage}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
 
-          {/* Usage Hint */}
-          <div className="p-5 rounded-2xl bg-card border border-border">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-icons text-sky-500 text-xl leading-none">lightbulb</span>
-              <h3 className="font-semibold text-foreground">{t("observe.usageHint")}</h3>
-            </div>
-            <ul className="space-y-2">
-              {usages.map((usage, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="material-icons text-primary/50 text-sm leading-5">chevron_right</span>
-                  {usage}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Scene Suggestions */}
-          <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-icons text-emerald-600 text-xl leading-none">nature</span>
-              <h3 className="font-semibold text-emerald-800 dark:text-emerald-200">어울리는 장면</h3>
-            </div>
-            <div className="space-y-2">
-              {scenes.map((scene, i) => (
-                <p key={i} className="text-sm text-emerald-700 dark:text-emerald-300 leading-relaxed">
-                  {scene}
+          {/* 낱말 확장으로 이동 */}
+          {result.source !== "fallback" && (
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="material-icons text-emerald-600 text-xl leading-none">account_tree</span>
+                <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                  <span className="font-semibold">"{result.word}"</span>에서 가지를 뻗어볼까요?
                 </p>
-              ))}
+              </div>
+              <a
+                href={`/expand`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.history.pushState({}, "", `/expand`);
+                  window.dispatchEvent(new PopStateEvent("popstate"));
+                }}
+                className="shrink-0 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+              >
+                낱말 확장 →
+              </a>
             </div>
-          </div>
+          )}
         </div>
       )}
 
       {!result && !loading && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <span className="material-icons text-muted-foreground/20 text-6xl leading-none mb-4">search</span>
+          <div className="relative mb-6">
+            <span className="material-icons text-muted-foreground/20 text-6xl leading-none">search</span>
+          </div>
           <p className="text-muted-foreground text-base">관찰하고 싶은 낱말을 입력해 보세요.</p>
           <p className="text-muted-foreground/60 text-sm mt-1">예: 봄비, 그리움, 설레다</p>
+          <div className="mt-6 inline-flex items-center gap-1.5 text-xs text-muted-foreground/50">
+            <span className="material-icons text-xs leading-none">menu_book</span>
+            국립국어원 표준국어대사전 연동
+          </div>
         </div>
       )}
     </div>
