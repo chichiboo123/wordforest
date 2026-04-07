@@ -69,8 +69,8 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
   try {
     data = JSON.parse(text);
   } catch {
-    // KRDICT sometimes returns XML even with req_type=json
-    return json(404, { error: "No result found" });
+    // KRDICT sometimes returns XML or invalid JSON — expose raw for debugging
+    return json(404, { error: "Invalid JSON from KRDICT", raw: text.slice(0, 500) });
   }
 
   const d = data as Record<string, unknown>;
