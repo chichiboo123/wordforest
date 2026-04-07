@@ -74,10 +74,19 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
   }
 
   const d = data as Record<string, unknown>;
-  const item = (d?.channel as Record<string, unknown>)?.item as unknown[] | undefined;
+  const channel = d?.channel as Record<string, unknown> | undefined;
+  const item = channel?.item as unknown[] | undefined;
   const firstItem = item?.[0] as Record<string, unknown> | undefined;
   if (!firstItem) {
-    return json(404, { error: "No result found" });
+    // 디버그: KRDICT 실제 응답 구조 확인용 (배포 안정화 후 제거)
+    return json(404, {
+      error: "No result found",
+      debug: {
+        total: channel?.total,
+        error: channel?.error,
+        keys: channel ? Object.keys(channel) : [],
+      },
+    });
   }
 
   const sense = (firstItem.sense as unknown[])?.[0] as Record<string, unknown> | undefined;
