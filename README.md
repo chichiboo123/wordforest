@@ -87,7 +87,7 @@ GitHub 저장소 → Settings → Secrets and variables → Actions에서
 
 ## 저장소 이름 / Repository Name
 
-이 프로젝트의 GitHub 저장소 이름은 `forestofwords`입니다.
+이 프로젝트의 GitHub 저장소 이름은 `wordforest`입니다.
 
 ## 라이선스 / License
 
