@@ -53,22 +53,41 @@ interface WordResult {
   example: string;
 }
 
+function toWordResult(data: any, fallbackWord: string): WordResult | null {
+  const proxyItem = data?.item;
+  if (proxyItem && typeof proxyItem === "object") {
+    return {
+      word: proxyItem.word || fallbackWord,
+      pos: proxyItem.pos || "알 수 없음",
+      definition: proxyItem.definition || "뜻을 찾을 수 없어요.",
+      example: proxyItem.example || "",
+    };
+  }
+
+  const stdictItem = data?.channel?.item?.[0];
+  if (stdictItem) {
+    return {
+      word: stdictItem.word || fallbackWord,
+      pos: stdictItem.pos || "알 수 없음",
+      definition: stdictItem.sense?.[0]?.definition || stdictItem.definition || "뜻을 찾을 수 없어요.",
+      example: stdictItem.sense?.[0]?.example?.[0]?.example || "",
+    };
+  }
+
+  return null;
+}
+
 async function lookupWord(word: string): Promise<WordResult | null> {
-  const apiKey = import.meta.env.VITE_KRDICT_API_KEY;
-  if (apiKey && apiKey !== "placeholder" && apiKey !== "") {
+  const proxyUrl = import.meta.env.VITE_KRDICT_PROXY_URL?.trim();
+  if (proxyUrl) {
     try {
-      const url = `https://stdict.korean.go.kr/api/search.do?q=${encodeURIComponent(word)}&key=${apiKey}&type_search=search&req_type=json&num=3`;
+      const url = `${proxyUrl}?q=${encodeURIComponent(word)}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        const item = data?.channel?.item?.[0];
-        if (item) {
-          return {
-            word: item.word || word,
-            pos: item.pos || "알 수 없음",
-            definition: item.sense?.[0]?.definition || item.definition || "뜻을 찾을 수 없어요.",
-            example: item.sense?.[0]?.example?.[0]?.example || "",
-          };
+        const parsed = toWordResult(data, word);
+        if (parsed) {
+          return parsed;
         }
       }
     } catch {

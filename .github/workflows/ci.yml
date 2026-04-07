@@ -42,7 +42,7 @@ jobs:
         env:
           BASE_PATH: /wordforest/
           PORT: 3000
-          VITE_KRDICT_API_KEY: ${{ secrets.VITE_KRDICT_API_KEY }}
+          VITE_KRDICT_PROXY_URL: ${{ vars.VITE_KRDICT_PROXY_URL }}
 
       - name: Setup Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -69,9 +69,8 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# To add the dictionary API key:
+# To configure dictionary lookup in GitHub Pages:
 # Go to GitHub repository → Settings → Secrets and variables → Actions
-# Add a secret named VITE_KRDICT_API_KEY with your API key from
-# https://stdict.korean.go.kr/openapi/openApiInfo.do
+# Add a variable named VITE_KRDICT_PROXY_URL with your proxy endpoint URL
 #
 # GitHub Pages is automatically deployed from GitHub Actions on main branch push

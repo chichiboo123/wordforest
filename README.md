@@ -47,14 +47,19 @@ pnpm install
 
 ### 환경 변수 / Environment Variables (Optional)
 
-사전 API를 사용하려면 `artifacts/wordforest/.env.local` 파일을 만들고:
+> ⚠️ GitHub Pages(정적 배포)에서는 비밀 키를 프론트엔드에 안전하게 숨길 수 없습니다.
+> 따라서 API 키는 반드시 서버(프록시)에서만 사용하세요.
+
+사전 API를 사용하려면 서버 프록시를 하나 두고(Cloudflare Workers, Vercel Functions, Netlify Functions 등),
+`artifacts/wordforest/.env.local` 파일에 프록시 URL을 설정하세요:
 
 ```env
-VITE_KRDICT_API_KEY=your_api_key_here
+VITE_KRDICT_PROXY_URL=https://<your-proxy-domain>/api/dictionary
 ```
 
+프론트는 위 프록시를 호출하고, 프록시 서버가 표준국어대사전 API 키를 사용해 실제 요청을 수행합니다.
 API 키는 [국립국어원 표준국어대사전 오픈 API](https://stdict.korean.go.kr/openapi/openApiInfo.do)에서 발급받을 수 있습니다.
-API 키 없이도 내장 목업 데이터로 정상 작동합니다.
+프록시 없이도 내장 목업 데이터로 정상 작동합니다.
 
 ### 개발 서버 실행 / Run Dev Server
 
@@ -81,9 +86,12 @@ pnpm run typecheck
 `.github/workflows/ci.yml`에 CI 워크플로가 포함되어 있습니다.
 `main` 브랜치 push 및 pull request 시 자동으로 타입 체크와 빌드가 실행됩니다.
 
-사전 API 키를 GitHub Actions에서 사용하려면:
-GitHub 저장소 → Settings → Secrets and variables → Actions에서
-`VITE_KRDICT_API_KEY` 시크릿을 추가하세요.
+GitHub Pages + GitHub Actions 기준 권장 설정:
+1. GitHub 저장소 → **Settings → Secrets and variables → Actions**
+2. **Variables**에 `VITE_KRDICT_PROXY_URL` 추가
+3. 값은 배포된 프록시 주소(예: `https://your-worker.example.com/api/dictionary`)로 설정
+
+`VITE_KRDICT_API_KEY` 같은 비밀 키를 프론트 빌드 변수로 주입하지 마세요.
 
 ## 저장소 이름 / Repository Name
 
