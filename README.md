@@ -93,6 +93,13 @@ GitHub Pages + GitHub Actions 기준 권장 설정:
 
 `VITE_KRDICT_API_KEY` 같은 비밀 키를 프론트 빌드 변수로 주입하지 마세요.
 
+### Netlify Functions 사용 시
+
+- 이 저장소에는 `netlify/functions/krdict.ts` 함수가 포함되어 있습니다.
+- Netlify 대시보드에서 다음 환경변수를 추가하세요:
+  - `KRDICT_API_KEY` (Secret)
+  - `VITE_KRDICT_PROXY_URL` (선택, 비워두면 Netlify 도메인에서는 `/.netlify/functions/krdict` 기본 경로 사용)
+
 ## 저장소 이름 / Repository Name
 
 이 프로젝트의 GitHub 저장소 이름은 `wordforest`입니다.

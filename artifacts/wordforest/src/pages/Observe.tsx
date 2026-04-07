@@ -78,7 +78,11 @@ function toWordResult(data: any, fallbackWord: string): WordResult | null {
 }
 
 async function lookupWord(word: string): Promise<WordResult | null> {
-  const proxyUrl = import.meta.env.VITE_KRDICT_PROXY_URL?.trim();
+  const configuredProxyUrl = import.meta.env.VITE_KRDICT_PROXY_URL?.trim();
+  const isNetlifyHost =
+    typeof window !== "undefined" &&
+    (window.location.hostname.endsWith(".netlify.app") || window.location.hostname === "localhost");
+  const proxyUrl = configuredProxyUrl || (isNetlifyHost ? "/.netlify/functions/krdict" : "");
   if (proxyUrl) {
     try {
       const url = `${proxyUrl}?q=${encodeURIComponent(word)}`;
