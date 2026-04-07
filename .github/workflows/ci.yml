@@ -37,7 +37,17 @@ jobs:
           PORT: 3000
           VITE_KRDICT_API_KEY: ${{ secrets.VITE_KRDICT_API_KEY }}
 
+      - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./artifacts/wordforest/dist
+          cname: wordforest-chichiboo.com
+
 # To add the dictionary API key:
 # Go to GitHub repository → Settings → Secrets and variables → Actions
 # Add a secret named VITE_KRDICT_API_KEY with your API key from
 # https://stdict.korean.go.kr/openapi/openApiInfo.do
+#
+# GitHub Pages is automatically deployed from dist/ on main branch push
